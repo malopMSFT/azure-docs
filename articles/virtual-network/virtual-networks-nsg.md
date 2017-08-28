@@ -45,10 +45,14 @@ NSG rules contain the following properties:
 | --- | --- | --- | --- |
 | **Name** |Name for the rule. |Must be unique within the region.<br/>Can contain letters, numbers, underscores, periods, and hyphens.<br/>Must start with a letter or number.<br/>Must end with a letter, number, or underscore.<br/>Cannot exceed 80 characters. |You may have several rules within an NSG, so make sure you follow a naming convention that allows you to identify the function of your rule. |
 | **Protocol** |Protocol to match for the rule. |TCP, UDP, or * |Using * as a protocol includes ICMP (East-West traffic only), as well as UDP and TCP, and may reduce the number of rules you need.<br/>At the same time, using * might be too broad an approach, so it's recommended that you use * only when necessary. |
-| **Source port range** |Source port range to match for the rule. |Single port number from 1 to 65535, port range (example: 1-65535), or * (for all ports). |Source ports could be ephemeral. Unless your client program is using a specific port, use * in most cases.<br/>Try to use port ranges as much as possible to avoid the need for multiple rules.<br/>Multiple ports or port ranges cannot be grouped by a comma. |
-| **Destination port range** |Destination port range to match for the rule. |Single port number from 1 to 65535, port range (example: 1-65535), or \* (for all ports). |Try to use port ranges as much as possible to avoid the need for multiple rules.<br/>Multiple ports or port ranges cannot be grouped by a comma. |
-| **Source address prefix** |Source address prefix or tag to match for the rule. |Single IP address (example: 10.10.10.10), IP subnet (example: 192.168.1.0/24), [default tag](#default-tags), or * (for all addresses). |Consider using ranges, default tags, and * to reduce the number of rules. |
-| **Destination address prefix** |Destination address prefix or tag to match for the rule. | Single IP address (example: 10.10.10.10), IP subnet (example: 192.168.1.0/24), [default tag](#default-tags), or * (for all addresses). |Consider using ranges, default tags, and * to reduce the number of rules. |
+| **Source port range** |Source port range to match for the rule. |Single port number from 1 to 65535, port range (example: 1-65535), or * (for all ports). |Source ports could be ephemeral. Unless your client program is using a specific port, use * in most cases.<br/>Try to use multiple port ranges as much as possible to avoid the need for multiple rules.|
+| **Source port ranges** |Source port ranges to match for the rule. |Multiple port numbers from 1 to 65535, port range (example: 1-65535). | Try to use multiple port ranges as much as possible to avoid the need for multiple rules.|
+| **Destination port range** |Destination port range to match for the rule. |Single port number from 1 to 65535, port range (example: 1-65535), or \* (for all ports). |Try to use multiple port ranges as much as possible to avoid the need for multiple rules.|
+| **Destination port ranges** |Destination port ranges to match for the rule. |Multiple port numbers from 1 to 65535, port range (example: 1-65535). |Try to use multiple port ranges as much as possible to avoid the need for multiple rules.|
+| **Source address prefix** |Source address prefix or tag to match for the rule. |Single IP address (example: 10.10.10.10), IP subnet (example: 192.168.1.0/24), [service tags](#service-tags), or * (for all addresses). |Consider using multiple prefixes, default tags, and * to reduce the number of rules. |
+| **Source address prefixes** |Source address prefixes to match for the rule. |Multiple IP address (example: 10.10.10.10), IP subnet (example: 192.168.1.0/24). |Consider using multiple IP addresses/ranges to reduce the number of rules. |
+| **Destination address prefix** |Destination address prefix or tag to match for the rule. | Single IP address (example: 10.10.10.10), IP subnet (example: 192.168.1.0/24), [service tags](#service-tags), or * (for all addresses). |Consider using multiple prefixes, default tags, and * to reduce the number of rules. |
+| **Destination address prefixes** |Destination address prefixes to match for the rule. | Multiple IP address (example: 10.10.10.10), IP subnet (example: 192.168.1.0/24). |Consider using multiple IP addresses/ranges to reduce the number of rules.|
 | **Direction** |Direction of traffic to match for the rule. |Inbound or outbound. |Inbound and outbound rules are processed separately, based on direction. |
 | **Priority** |Rules are checked in the order of priority. Once a rule applies, no more rules are tested for matching. | Number between 100 and 4096. | Consider creating rules jumping priorities by 100 for each rule to leave space for new rules you might create in the future. |
 | **Access** |Type of access to apply if the rule matches. | Allow or deny. | Keep in mind that if an allow rule is not found for a packet, the packet is dropped. |
@@ -59,13 +63,20 @@ NSGs contain two sets of rules: Inbound and outbound. The priority for a rule mu
 
 The previous picture shows how NSG rules are processed.
 
-### Default Tags
-Default tags are system-provided identifiers to address a category of IP addresses. You can use default tags in the **source address prefix** and **destination address prefix** properties of any rule. There are three default tags you can use:
+### Service Tags
+Service tags are system-provided identifiers to address a category of IP addresses. You can use service tags in the **source address prefix** and **destination address prefix** properties of any rule. Service tags you can use:
 
 * **VirtualNetwork** (Resource Manager) (**VIRTUAL_NETWORK** for classic): This tag includes the virtual network address space (CIDR ranges defined in Azure), all connected on-premises address spaces, and connected Azure VNets (local networks).
 * **AzureLoadBalancer** (Resource Manager) (**AZURE_LOADBALANCER** for classic): This tag denotes Azure’s infrastructure load balancer. The tag translates to an Azure datacenter IP where Azure’s health probes originate.
 * **Internet** (Resource Manager) (**INTERNET** for classic): This tag denotes the IP address space that is outside the virtual network and reachable by public Internet. The range includes the [Azure owned public IP space](https://www.microsoft.com/download/details.aspx?id=41653).
+* **AzureTrafficManager**: This tag denotes the IP address space for AzureTrafficManager PaaS Service.
+* **Storage**: This tag denotes the IP address space for Storage PaaS Service. Regional tags are also available:
+  Storage.AustraliaEast, Storage.AustraliaSoutheast, Storage.BrazilSouth, Storage.CanadaCentral, Storage.CanadaEast, Storage.CentralIndia, Storage.CentralUS, Storage.CentralUSEUAP, Storage.EastAsia, Storage.EastUS, Storage.EastUS2, Storage.EastUS2EUAP, Storage.EastUS2Stage, Storage.FranceCentral, Storage.FranceSouth, Storage.JapanEast, Storage.JapanWest, Storage.KoreaCentral, Storage.KoreaSouth, Storage.NorthCentralUS, Storage.NorthCentralUSStage, Storage.NorthEurope, Storage.SouthCentralUS, Storage.SouthIndia, Storage.SoutheastAsia, Storage.UKNorth, Storage.UKSouth, Storage.UKSouth2, Storage.UKWest, Storage.WestCentralUS, Storage.WestEurope, Storage.WestIndia, Storage.WestUS, Storage.WestUS2
+* **Sql.WestCentralUS**: This tag denotes the IP address space for Sql.WestCentralUS PaaS Service on a regional format. Additional regional tags available:
+Sql.WestCentralUS, Sql.EastUS, Sql.WestUS, Sql.WestUS2, Sql.AustraliaEast, Sql.UKSouth
 
+Additional information on [Service Tags](service-tags.md)
+aka.ms/servicetags
 ### Default rules
 All NSGs contain a set of default rules. The default rules cannot be deleted, but because they are assigned the lowest priority, they can be overridden by the rules that you create. 
 
@@ -97,8 +108,10 @@ You can associate an NSG to VMs, NICs, and subnets, depending on the deployment 
 * **NIC (Resource Manager only):** Security rules are applied to all traffic to/from the NIC the NSG is associated to. In a multi-NIC VM, you can apply different (or the same) NSG to each NIC individually. 
 * **Subnet (Resource Manager and classic):** Security rules are applied to any traffic to/from any resources connected to the VNet.
 
-You can associate different NSGs to a VM (or NIC, depending on the deployment model) and the subnet that a NIC or VM is connected to. Security rules are applied to the traffic, by priority, in each NSG, in the following order:
-
+You can associate different NSGs to a VM (or NIC, depending on the deployment model) and the subnet that a NIC or VM is connected to. 
+If a VM has 2 NSG associated with the Subnet and VM/NIC, both NSG security rules are applied to the traffic, by priority on each NSG, for any given traffic to be allowed, both NSG needs to allow the traffic, if any NSG has a matching deny rule , the packet is dropped. 
+ 
+The following logic represents an abstraction on how the NSG is being processed:
 - **Inbound traffic**
 
   1. **NSG applied to subnet:** If a subnet NSG has a matching rule to deny traffic, the packet is dropped.
@@ -146,7 +159,7 @@ Since NSGs can be applied to subnets, you can minimize the number of NSGs by gro
 ### Special rules
 If you block traffic allowed by the following rules, your infrastructure can't communicate with essential Azure services:
 
-* **Virtual IP of the host node:** Basic infrastructure services such as DHCP, DNS, and health monitoring are provided through the virtualized host IP address 168.63.129.16. This public IP address belongs to Microsoft and is the only virtualized IP address used in all regions for this purpose. This IP address maps to the physical IP address of the server machine (host node) hosting the VM. The host node acts as the DHCP relay, the DNS recursive resolver, and the probe source for the load balancer health probe and the machine health probe. Communication to this IP address is not an attack.
+* **Virtual IP of the host node:** Basic infrastructure services such as DHCP, DNS, and health monitoring are provided through the virtualized host IP address 168.63.129.16/169.254.169.254. This public IP address belongs to Microsoft and is the only virtualized IP address used in all regions for this purpose. This IP address maps to the physical IP address of the server machine (host node) hosting the VM. The host node acts as the DHCP relay, the DNS recursive resolver, and the probe source for the load balancer health probe and the machine health probe. Communication to this IP address is not an attack.
 * **Licensing (Key Management Service):** Windows images running in VMs must be licensed. To ensure licensing, a request is sent to the Key Management Service host servers that handle such queries. The request is made outbound through port 1688.
 
 ### ICMP traffic
